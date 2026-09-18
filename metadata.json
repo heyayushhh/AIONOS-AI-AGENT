@@ -1,0 +1,6 @@
+{
+  "name": "DealFlow AI",
+  "description": "AI-powered Sales & Alliances workflow platform to capture inquiries, qualify opportunities, discover capabilities, generate proposals, and orchestrate intelligent follow-ups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
