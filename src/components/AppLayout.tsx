@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, LayoutDashboard, FileText, CheckSquare, Activity, Settings, Database, Plus } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, CheckSquare, Activity, Settings, Database, Plus, Sparkles, AlertCircle } from 'lucide-react';
 import { useStore } from '../lib/store';
+import { apiClient } from '../services/apiClient';
+import { ApiHealthResponse } from '../types';
 
 export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { activities } = useStore();
-  
+  const [health, setHealth] = useState<ApiHealthResponse | null>(null);
+
+  useEffect(() => {
+    apiClient.getHealth().then(setHealth).catch(() => {
+      setHealth({ status: 'fallback', mode: 'demo', hasApiKey: false, model: 'gemini-2.5-flash (local)' });
+    });
+  }, []);
+
   const pendingApprovals = activities.filter(a => a.status === 'pending_approval').length;
 
   const navItems = [
@@ -19,6 +28,8 @@ export default function AppLayout() {
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
 
+  const isLive = health?.mode === 'live';
+
   return (
     <div className="min-h-screen bg-[#03111e] text-foreground relative overflow-hidden font-body selection:bg-white/20 flex flex-col md:flex-row">
       {/* Background ambient lighting */}
@@ -26,15 +37,24 @@ export default function AppLayout() {
 
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 border-r border-white/10 bg-[#041424]/80 backdrop-blur-md relative z-10 flex flex-col hidden md:flex">
-        <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-            <Database className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-xl text-white tracking-tight">DealFlow AI</span>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider">Demo</span>
+        <div className="p-6 border-b border-white/10 flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <Database className="w-4 h-4 text-emerald-400" />
             </div>
+            <div className="flex flex-col">
+              <span className="font-display text-xl text-white tracking-tight">DealFlow AI</span>
+            </div>
+          </div>
+
+          {/* AI Mode Indicator Badge */}
+          <div className={`mt-1 text-xs px-3 py-1.5 rounded-lg border flex items-center gap-2 font-medium ${
+            isLive 
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
+              : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+          }`}>
+            {isLive ? <Sparkles className="w-3.5 h-3.5 animate-pulse text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            <span>{isLive ? 'Live Gemini AI Mode' : 'Demo Mode (Fallback)'}</span>
           </div>
         </div>
         
@@ -72,7 +92,11 @@ export default function AppLayout() {
         <div className="flex items-center gap-2">
            <Database className="w-5 h-5 text-emerald-400" />
            <span className="font-display text-lg text-white">DealFlow AI</span>
-           <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider">Demo</span>
+           <span className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase tracking-wider ${
+             isLive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+           }`}>
+             {isLive ? 'Live AI' : 'Demo'}
+           </span>
         </div>
         <button onClick={() => navigate('/')} className="text-xs text-white/50">Back</button>
       </header>

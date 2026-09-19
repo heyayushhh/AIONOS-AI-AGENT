@@ -1,16 +1,17 @@
 <div align="center">
   
 # 🌌 DealFlow AI 
-**The Autonomous Agentic Sales & Alliances Platform**
+**Real Gemini-Powered Agentic Sales & Alliances Platform**
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](#)
+[![Gemini AI](https://img.shields.io/badge/Gemini_2.5_Flash-8E75FF?style=for-the-badge&logo=google&logoColor=white)](#)
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](#)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](#)
 
-A breathtaking, cinematic frontend demonstration showing how a multi-agent AI system can orchestrate the entire lifecycle of enterprise sales opportunities.
+An enterprise multi-agent sales platform driven by a secure, server-side Gemini AI gateway with structured outputs, grounded RAG retrieval, human approval governance, and automatic fallback.
 
-[**Explore the Walkthrough**](docs/demo-guide.md) • [**View Architecture**](docs/architecture.md)
+[**Explore Demo Guide**](docs/demo-guide.md) • [**View Architecture**](docs/architecture.md) • [**API Contracts**](docs/api-contracts.md)
 
 </div>
 
@@ -18,62 +19,88 @@ A breathtaking, cinematic frontend demonstration showing how a multi-agent AI sy
 
 ## ⚡ What is DealFlow AI?
 
-DealFlow AI transforms unstructured, messy business inquiries (like emails, raw meeting notes, or RFP fragments) into a fully structured, qualified deal pipeline using **Simulated Autonomous AI Agents**. 
+DealFlow AI transforms messy business inquiries (like emails, raw meeting notes, or RFP fragments) into a fully structured, qualified deal pipeline using **5 Orchestrated Autonomous AI Agents**.
 
-Built for the **AIONOS Internship Demonstration**, this project replaces static dashboards with a dynamic, living workspace where specialized AI agents collaborate, match capabilities, and draft client-ready proposals.
+Built for the **AIONOS Demonstration**, this system integrates real **Google Gemini API** calls over a secure server gateway while providing a seamless **Demo Mode** fallback when credentials are not supplied.
 
-### 🎭 The AI Agents (Simulated)
+### 🎭 The 5 Autonomous AI Agents
 
-- **🕵️ Intake Agent**: Ingests unstructured text, extracting formal technical/business requirements, and flagging risks or missing information.
-- **⚖️ Qualification Agent**: Scores the opportunity based on budget, timeline feasibility, and strategic fit.
-- **🔗 Capability Matcher**: Semantically searches the internal Knowledge Base (simulating RAG) to match requirements to firm capabilities and Subject Matter Experts (SMEs).
-- **📝 Proposal Drafter**: Synthesizes the matches and client needs into a multi-section, authoritative proposal draft.
-- **🤖 Follow-up Planner**: Orchestrates next steps, assigning tasks to both humans and AI workers.
+1. **🕵️ Intake Agent**: Ingests unstructured inquiries, extracting categorized technical/business requirements, criticality ratings, missing parameters, and operational risks.
+2. **⚖️ Qualification Agent**: Scores strategic fit and feasibility (labeled as a *Demo-generated estimate*), highlighting key strengths, risks, and prospect follow-up questions.
+3. **🔗 Capability Matcher (RAG)**: Grounded in internal knowledge base documents. Matches requirements to firm solutions and SMEs while citing source document IDs (`[doc-1]`, `[doc-3]`).
+4. **📝 Proposal Drafter**: Synthesizes client needs and matched evidence into a multi-section proposal draft.
+5. **🤖 Follow-up Planner**: Generates an actionable task backlog with assigned Human vs. AI owners, priorities, and suggested due dates.
+6. **🛡️ Human Approval Gate**: Mandatory governance layer requiring executive review and sign-off before proposals are finalized.
 
-## ✨ Key Features
+---
 
-- **Cinematic UX**: A premium, dark-navy glassmorphic interface that feels like a command center.
-- **Deterministic Simulation**: A completely local, mock service layer that deterministically mimics LLM latency and outputs without needing a backend or API keys.
-- **Global State Management**: Context and LocalStorage powered pipeline that persists across your demo session.
-- **Human-in-the-Loop (HITL)**: Built-in approval gateways requiring executive sign-off before AI actions are finalized.
-- **Mobile Responsive**: Fully usable across desktop, tablet, and mobile devices with dedicated bottom navigation.
+## 🔒 Security Architecture
 
-## 🚀 Getting Started
+- **Zero Client Key Exposure**: `GEMINI_API_KEY` is strictly managed by the server API layer (`server/`). It is never bundled into client JS code or exposed in network payloads.
+- **Dual Engine Modes**:
+  - **🟢 Live Gemini AI Mode**: Active when `GEMINI_API_KEY` is set in `.env`. Calls `@google/genai` with strict `responseSchema` validation.
+  - **🟡 Demo Mode**: Automatic local deterministic fallback if no API key is present or if API rate limits occur. Visible mode badge in UI.
 
-To run the demonstration locally:
+---
 
+## 🚀 Quick Start
+
+### 1. Installation
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/heyayushhh/AIONOS-AI-AGENT.git
 cd AIONOS-AI-AGENT
 
-# 2. Install dependencies (npm, pnpm, or bun)
+# Install dependencies
 npm install
-
-# 3. Start the development server
-npm run dev
 ```
 
-Open `http://localhost:3000` (or the port specified by Vite) in your browser.
+### 2. Environment Configuration
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+To run in **Live AI Mode**, set your Gemini API key in `.env`:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
+AI_MODE=live
+```
+*(If left blank or set to `AI_MODE=demo`, the application will automatically run in Demo Mode with deterministic local mock data).*
 
-## 📖 Running the Demo
+### 3. Start Development Server
+```bash
+npm run dev
+```
+Open `http://localhost:3000` in your browser.
 
-1. Click **Go to Workspace** on the landing page.
-2. Hit the **+ New Opportunity** button.
-3. Click **Load Demo Inquiry** to auto-fill a realistic cloud modernization scenario.
+---
+
+## 📖 Running the Demo Walkthrough
+
+1. Click **Open Workspace** on the landing page.
+2. Click **+ New Opportunity** in the sidebar.
+3. Click **Load Demo Inquiry** to load the AWS cloud modernization scenario.
 4. Click **Analyze Opportunity**.
-5. Inside the Opportunity Workspace, click **Run Analysis Workflow** and watch the agents work their magic!
+5. Click **Run Agent Workflow** and watch the 5 agents execute sequentially on the timeline.
+6. Review extracted requirements, capability matches with cited document IDs (`[doc-1]`, `[doc-3]`), and the generated proposal draft.
+7. Click **Approve Proposal** in the Proposal tab to complete the Human Approval Gate.
 
-> See `docs/demo-guide.md` for a complete step-by-step walkthrough.
+> See [`docs/demo-guide.md`](docs/demo-guide.md) for full step-by-step instructions.
 
-## 🏗️ Architecture & Documentation
+---
 
-All technical documentation is located in the `docs/` folder:
-- [`Architecture`](docs/architecture.md) - System design and mock service layer details.
-- [`Agent Workflow`](docs/agent-workflow.md) - How the multi-agent pipeline operates.
-- [`Prompt Engineering`](docs/prompt-engineering.md) - The personas and schemas designed for the agents.
-- [`RAG Design`](docs/rag-design.md) - How the simulated Retrieval-Augmented Generation works.
-- [`Future Roadmap`](docs/future-production-roadmap.md) - Path to taking this to production with LangGraph and real LLMs.
+## 🏗️ Technical Documentation
+
+All detailed technical documentation is located in `docs/`:
+- [`Architecture`](docs/architecture.md) - System architecture and server gateway design.
+- [`Agent Workflow`](docs/agent-workflow.md) - Pipeline breakdown for all 5 specialized agents.
+- [`Prompt Engineering`](docs/prompt-engineering.md) - System instructions, schemas, and injection protection.
+- [`RAG Design`](docs/rag-design.md) - Keyword retrieval implementation and document citation tracking.
+- [`API Contracts`](docs/api-contracts.md) - Complete REST API specification.
+- [`Demo Guide`](docs/demo-guide.md) - Execution guide for Live vs Demo modes.
+- [`Future Roadmap`](docs/future-production-roadmap.md) - Path to production with LangGraph, Pinecone, and PostgreSQL.
+- [`Database Design`](docs/database-design.md) - PostgreSQL schema design for enterprise persistence.
 
 ---
 <div align="center">

@@ -1,4 +1,4 @@
-export type WorkflowStatus = 'Not Started' | 'Running' | 'Completed' | 'Needs Review' | 'Blocked';
+export type WorkflowStatus = 'Not Started' | 'Queued' | 'Running' | 'Completed' | 'Failed' | 'Needs Review' | 'Blocked';
 export type AgentType = 'Intake' | 'Qualification' | 'Capability Matching' | 'Proposal' | 'Follow-up Planner';
 
 export interface AgentActivity {
@@ -8,7 +8,7 @@ export interface AgentActivity {
   dealName: string;
   timestamp: string;
   type: 'qualification' | 'proposal' | 'match' | 'followup' | 'intake';
-  status: 'completed' | 'in_progress' | 'pending_approval' | 'blocked';
+  status: 'completed' | 'in_progress' | 'pending_approval' | 'blocked' | 'failed';
 }
 
 export interface OpportunityAgentState {
@@ -17,6 +17,7 @@ export interface OpportunityAgentState {
   startedAt?: string;
   completedAt?: string;
   logs: string[];
+  error?: string;
 }
 
 export interface Requirement {
@@ -26,24 +27,45 @@ export interface Requirement {
   criticality: 'High' | 'Medium' | 'Low';
 }
 
+export interface QualificationResult {
+  classification: 'Qualified' | 'Unqualified' | 'Nurture';
+  estimatedScore: number;
+  scoreLabelNote: string; // e.g. "Demo-generated estimate based on initial inquiry parameters"
+  strengths: string[];
+  risks: string[];
+  missingInformation: string[];
+  qualificationSummary: string;
+  followUpQuestions: string[];
+}
+
 export interface CapabilityMatch {
   id: string;
   name: string;
   description: string;
   relevanceScore: number;
+  relevanceExplanation?: string;
   evidence: string[];
+  evidenceDocIds?: string[];
   experts: string[];
+  unsupportedAssumptions?: string[];
 }
 
 export interface ProposalSection {
   id: string;
   title: string;
   content: string;
+  evidenceDocIds?: string[];
 }
 
 export interface ProposalDraft {
   id: string;
+  title: string;
+  executiveSummary: string;
   sections: ProposalSection[];
+  assumptions: string[];
+  risks: string[];
+  openQuestions: string[];
+  nextSteps: string[];
   status: 'Draft' | 'Needs Review' | 'Approved' | 'Rejected';
   createdAt: string;
   updatedAt: string;
@@ -54,19 +76,23 @@ export interface FollowUpTask {
   title: string;
   description: string;
   assignee: 'Human' | 'AI';
+  priority?: 'High' | 'Medium' | 'Low';
   dueDate: string;
   status: 'Pending' | 'Completed';
 }
 
 export interface Opportunity {
   id: string;
-  title: string; // Formerly name
-  company: string; // Formerly partner
+  title: string;
+  company: string;
   industry: string;
   value: string;
   stage: 'New' | 'Qualified' | 'Drafting' | 'Review' | 'Approved' | 'Closed' | 'Nurture';
   confidenceScore: number;
   
+  // Mode used for workflow execution
+  mode?: 'live' | 'demo';
+
   // Intake specific
   inquiry: string;
   budget: string;
@@ -83,9 +109,11 @@ export interface Opportunity {
   requirements?: Requirement[];
   missingInformation?: string[];
   risks?: string[];
+  qualification?: QualificationResult;
   capabilities?: CapabilityMatch[];
   proposal?: ProposalDraft;
   followUps?: FollowUpTask[];
+  retrievedDocs?: Array<{ id: string; title: string; summary: string }>;
 }
 
 export interface KnowledgeDoc {
@@ -95,9 +123,17 @@ export interface KnowledgeDoc {
   summary: string;
   content: string;
   tags: string[];
+  experts?: string[];
 }
 
 export interface NavItem {
   label: string;
   href: string;
+}
+
+export interface ApiHealthResponse {
+  status: string;
+  mode: 'live' | 'demo';
+  hasApiKey: boolean;
+  model: string;
 }
